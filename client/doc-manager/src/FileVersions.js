@@ -34,7 +34,7 @@ function FileVersions() {
     <div>
       <h1>Found {data.length} File Versions</h1>
       <div>
-        <FileVersionsList file_versions={data} />h
+        <FileVersionsList file_versions={data} />
       </div>
     </div>
   );
