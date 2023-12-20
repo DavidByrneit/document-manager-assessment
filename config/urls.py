@@ -15,12 +15,15 @@ urlpatterns = [
     # DRF auth token
     path("api-auth/", include("rest_framework.urls")),
     path("auth-token/", obtain_auth_token),
+    path('file_versions/<str:hash_value>/', FileVersionViewSet.as_view({'get': 'retrieve_by_hash'})),
+
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(
         "api/docs/",
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
+    path("users/", include("propylon_document_manager.users.urls")),
 ]
 
 if settings.DEBUG:
