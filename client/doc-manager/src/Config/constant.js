@@ -1,0 +1,1 @@
+export const PROCESS_API_SERVER = "http://localhost:8001/";
