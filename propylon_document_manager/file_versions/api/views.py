@@ -7,7 +7,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.core.files import File
 from urllib.parse import unquote
-from file_versions.models import FileVersion
+
+from propylon_document_manager.file_versions.permissions import HasAccessToFileVersion
+from ..models import FileVersion
 from .serializers import FileVersionSerializer
 from django.db.models import Max
 from rest_framework.authentication import TokenAuthentication
@@ -18,7 +20,7 @@ from rest_framework.exceptions import ValidationError
 class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, GenericViewSet):
     # Set authentication and permission classes to empty - no authentication or permissions required
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,HasAccessToFileVersion]
     # Set the serializer class to FileVersionSerializer
     serializer_class = FileVersionSerializer
     # Set the queryset to all FileVersion objects
@@ -31,7 +33,7 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
         # Return only the FileVersion objects that belong to the current user
         return FileVersion.objects.filter(user=self.request.user)
 
-    from rest_framework.exceptions import ValidationError
+    
 
     def create(self, request, *args, **kwargs):
         # Get the document path from the request

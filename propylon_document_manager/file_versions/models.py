@@ -21,4 +21,4 @@ class FileVersion(models.Model):
             else:
                 file_hash.update(f.read())
             self.hash_value = file_hash.hexdigest()
-        super().save(*args, **kwargs)
+            super().save(*args, **kwargs)

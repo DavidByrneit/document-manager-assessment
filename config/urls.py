@@ -15,7 +15,7 @@ urlpatterns = [
     # DRF auth token
     path("api-auth/", include("rest_framework.urls")),
     path("auth-token/", obtain_auth_token),
-    path('file_versions/<str:hash_value>/', FileVersionViewSet.as_view({'get': 'retrieve_by_hash'})),
+    path('file_version/<str:hash_value>/', FileVersionViewSet.as_view({'get': 'retrieve_by_hash'}), name='file_version_by_hash'),
 
     path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(
