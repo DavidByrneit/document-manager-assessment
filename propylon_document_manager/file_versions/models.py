@@ -1,4 +1,5 @@
 import hashlib
+import os
 from django.db import models
 from django.conf import settings
 
@@ -11,6 +12,10 @@ class FileVersion(models.Model):
     hash_value = models.CharField(max_length=64, editable=False,null=True,default=None)
 
     def save(self, *args, **kwargs):
+        original_name = self.file.name
+        base_name, extension = os.path.splitext(original_name)
+        self.file.name = f"{base_name}_v{self.version_number}{extension}"
+
         # Open the file in binary mode
         with self.file.open('rb') as f:
             # Compute the hash of the file content
