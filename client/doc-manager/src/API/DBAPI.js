@@ -9,25 +9,41 @@ class DBAPI {
     return axios.post(`api/users/`, data);
   };
 
-  static GetFiles = (data) => {
-    console.log(data)
-    console.log(localStorage.getItem("token"))
-    return axios.get(`api/file_versions/`, {
-      params: data,
+  
+static GetFiles = (data) => {
+  return axios.get(`api/file_versions/`, {
+    headers: {
+        'Authorization': `Token ${localStorage.getItem("token")}`
+    }
+});
+};
+static CreateFile = (data) => {
+
+    // Send the file data to the server
+    return axios.post(`documents/${data.get('url')}`, data, {
+      headers: {
+        'Authorization': `Token ${localStorage.getItem("token")}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  };
+
+  
+
+  
+  static GetByHash = (data) => {
+    return axios.get(`file_version/${data.hash}`, {
       headers: {
           'Authorization': `Token ${localStorage.getItem("token")}`
       }
   });
-};
-  static CreateFile = (data) => {
-    return axios.post(`createFile`, data);
   };
-  
-  static GetByHash = (hash,data) => {
-    return axios.get(`GetByHash/${hash}`, data);
-  };
-  static GetSteps = (step,data) => {
-    return axios.get(`getSteps/${step}`, data);
+  static GetDocumentByHash = (id,data) => {
+    return axios.get(`file_version/${id}`, {
+      headers: {
+          'Authorization': `Token ${localStorage.getItem("token")}`
+      }
+  });
   };
 
   static GetUsers = (data) => {

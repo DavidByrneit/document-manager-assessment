@@ -83,7 +83,7 @@ useEffect(() => {
       <td className="text-center p-2 border border-gray-400 text-sm text-gray-600">{file.version_number}</td>
       <td className="text-center p-2 border border-gray-400 text-sm text-gray-600">{file.url}</td>
       <td className="text-center p-2 border border-gray-400 text-sm text-gray-600">
-        <Link to={`view/${file.id}`} className="text-blue-500">View</Link>
+        <Link to={`view/${file.hash_value}`} className="text-blue-500">View</Link>
       </td>
     </tr>
     ))}

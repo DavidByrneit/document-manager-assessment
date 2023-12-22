@@ -7,6 +7,7 @@ import Logout from "./Pages/Logout";
 import ListDocuments from './Pages/ListDocuments';
 import CreateDocument from './Pages/CreateDocument';
 import DocumentByHash from './Pages/DocumentByHash';
+import DocumentView from './Pages/DocumentView';
 // import { ReactComponent as NavigationIcon } from './Assets/Icons/INCASELogo.svg';
 // import {HomeIcon,ClockIcon,StatsIcon,DocumentIcon,GlobeIcon,ProfileIcon,RocketIcon} from './Assets/Icons/Icons'
 
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="login" element={<Login onLogin={handleLogin} />} />
           <Route path="logout" element={<Logout onLogout={handleLogout}/>} />
           <Route path="list_documents" element={<ListDocuments isAuthenticated={isAuthenticated}/>} />
+          <Route path="list_documents/view/:id" element={<DocumentView isAuthenticated={isAuthenticated}/>} />
           <Route path="create_document" element={<CreateDocument isAuthenticated={isAuthenticated}/>} />
           <Route path="document_by_hash" element={<DocumentByHash isAuthenticated={isAuthenticated}/>} />
           <Route path="*" element={<NoMatch />} />

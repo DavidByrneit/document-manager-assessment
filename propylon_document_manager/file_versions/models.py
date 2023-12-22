@@ -20,5 +20,10 @@ class FileVersion(models.Model):
                     file_hash.update(chunk)
             else:
                 file_hash.update(f.read())
+
+            # Incorporate the version number into the hash to make it unique
+            version = str(self.version_number).encode()  
+            file_hash.update(version)
+
             self.hash_value = file_hash.hexdigest()
             super().save(*args, **kwargs)

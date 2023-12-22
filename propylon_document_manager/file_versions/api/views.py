@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.core.files import File
 from urllib.parse import unquote
-
+from django.core.files.storage import default_storage
 from propylon_document_manager.file_versions.permissions import HasAccessToFileVersion
 from ..models import FileVersion
 from .serializers import FileVersionSerializer
@@ -15,7 +15,7 @@ from django.db.models import Max
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
-
+from django.http import FileResponse
 # Define a viewset for FileVersion model
 class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, GenericViewSet):
     # Set authentication and permission classes to empty - no authentication or permissions required
@@ -40,13 +40,11 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
         document_path = unquote(kwargs.get('document_path'))
         # Get the file from the request
         file = request.FILES.get('file')
-        
         if file:
             # Check if a file with the same URL already exists for the current user
             existing_files_same_user = FileVersion.objects.filter(url=document_path, user=request.user)
             # Check if a file with the same URL exists for other users
             existing_files_other_users = FileVersion.objects.filter(url=document_path).exclude(user=request.user)
-
             if existing_files_other_users.exists():
                 # If a file with the same URL exists for other users, return an error
                 raise ValidationError('The URL has been taken already.')
@@ -103,9 +101,8 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
         except FileVersion.DoesNotExist:
             # If no FileVersion object with the given hash value exists, raise a 404 error
             raise Http404("File not found")
-
-        # Serialize the file_version object
-        serializer = self.get_serializer(file_version)
-
-        # Return the serialized data
-        return Response(serializer.data)
+        
+        # Open the file and read its content
+        file_path = file_version.file.path
+       
+        return FileResponse(open(file_path, 'rb'))

@@ -22,19 +22,19 @@ function CreateDocument({isAuthenticated}) {
    
   
     try {
-      let response = await ProcessApi.CreateFile({
-        url,
-        file
-      });
+      const formData = new FormData();
+      formData.append('url', url);
+      formData.append('file', file);
+      let response = await ProcessApi.CreateFile(formData);
       if (response.data && response.data.success === false) {
         return setError(response.data.message);
-      } else if (response.data ) {
+      } else {
         
-        navigate("/login");
+        navigate("/list_documents");
       }
     } catch (error) {
       console.error(error);
-      setError("An error occurred while creating your account.");
+      setError("An error occurred while creating Document.");
     }
   };
   return (
@@ -59,9 +59,9 @@ function CreateDocument({isAuthenticated}) {
         type="file"
         id="file"
         name="file"
-        value={file}
+        
         onChange={(event) =>
-          setFile(event.target.value )
+          setFile(event.target.files[0] )
         }
         required
         min="1"
