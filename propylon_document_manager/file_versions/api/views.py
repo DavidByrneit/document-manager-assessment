@@ -28,10 +28,7 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
     # Set the lookup field to "id"
     lookup_field = "id"
     
-    # Override the get_queryset method
-    def get_queryset(self):
-        # Return only the FileVersion objects that belong to the current user
-        return FileVersion.objects.filter(user=self.request.user)
+    
 
     
 
