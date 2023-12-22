@@ -16,6 +16,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 from django.http import FileResponse
+from rest_framework.request import Request
+from django.contrib.auth.models import User
+from typing import Any, Dict, Optional, Tuple
 # Define a viewset for FileVersion model
 class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, GenericViewSet):
     # Set authentication and permission classes to empty - no authentication or permissions required
@@ -32,16 +35,23 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
 
     
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request: Request, *args: Tuple[Any], **kwargs: Dict[str, Any]) -> Response:
         # Get the document path from the request
-        document_path = unquote(kwargs.get('document_path'))
+        document_path = kwargs.get('document_path', '')
+        if isinstance(document_path, str):
+            document_path = unquote(document_path)
+        else:
+            raise ValidationError('Document path must be a string.')
+        if not document_path:
+            raise ValidationError('Document path is required.')
         # Get the file from the request
         file = request.FILES.get('file')
         if file:
-            # Check if a file with the same URL already exists for the current user
-            existing_files_same_user = FileVersion.objects.filter(url=document_path, user=request.user)
-            # Check if a file with the same URL exists for other users
-            existing_files_other_users = FileVersion.objects.filter(url=document_path).exclude(user=request.user)
+            if isinstance(request.user, User):
+                existing_files_same_user = FileVersion.objects.filter(url=document_path, user=request.user)
+                existing_files_other_users = FileVersion.objects.filter(url=document_path).exclude(user=request.user)
+            else:
+                raise ValidationError('User not authenticated.')
             if existing_files_other_users.exists():
                 # If a file with the same URL exists for other users, return an error
                 raise ValidationError('The URL has been taken already.')
@@ -64,26 +74,37 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
             return Response(status=status.HTTP_400_BAD_REQUEST)
         
     # Define the retrieve method
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request: Request, *args: Any, **kwargs: Dict[str, Any]) -> Response:
         # Get the document path from the request
-        document_path = unquote(kwargs.get('document_path'))
+        document_path = kwargs.get('document_path', '')
+        if isinstance(document_path, str):
+            document_path = unquote(document_path)
+        else:
+            raise ValidationError('Document path must be a string.')
+        if not document_path:
+            raise ValidationError('Document path is required.')
         # Get the revision number from the request
         revision = request.GET.get('revision')
 
         if revision is not None:
             # If a revision number is provided, get that specific version
             try:
-                file_version = FileVersion.objects.get(url=document_path, version_number=revision, user=request.user)
+                if isinstance(request.user, User):
+                    file_version = FileVersion.objects.get(url=document_path, version_number=revision, user=request.user)
+                else:
+                    raise Http404("User not authenticated.")
             except FileVersion.DoesNotExist:
                 # If the requested version does not exist, raise a 404 error
                 raise Http404("File not found")
         else:
             # If no revision number is provided, get the latest version
-            file_version = FileVersion.objects.filter(url=document_path,user=request.user).order_by('-version_number').first()
-
-        if file_version is None:
-            # If no file version was found, raise a 404 error
-            raise Http404("File not found")
+            if isinstance(request.user, User):
+                file_version = FileVersion.objects.filter(url=document_path,user=request.user).order_by('-version_number').first()
+            else:
+                raise Http404("User not authenticated.")
+            if file_version is None:
+                # If no file version was found, raise a 404 error
+                raise Http404("File not found")
 
         # Serialize the file_version object
         serializer = self.get_serializer(file_version)
@@ -91,7 +112,7 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
         # Return the serialized data
         return Response(serializer.data)
     
-    def retrieve_by_hash(self, request, hash_value, *args, **kwargs):
+    def retrieve_by_hash(self, request: Request, hash_value: str, *args: Any, **kwargs: Dict[str, Any]) -> FileResponse:
         try:
             # Use the hash value to retrieve the corresponding FileVersion object
             file_version = FileVersion.objects.get(hash_value=hash_value)
@@ -104,11 +125,14 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
        
         return FileResponse(open(file_path, 'rb'))
     
-    def retrieve_by_hash_version_numbers(self, request, hash_value, *args, **kwargs):
+    def retrieve_by_hash_version_numbers(self, request: Request, hash_value: str, *args: Any, **kwargs: Dict[str, Any]) -> Response:
         try:
             # Use the hash value to retrieve the corresponding FileVersion object
             file_version = FileVersion.objects.get(hash_value=hash_value)
-            file_version_latest = FileVersion.objects.filter(url=file_version.url,user=request.user).order_by('-version_number').first()
+            if isinstance(request.user, User):
+                file_version_latest = FileVersion.objects.filter(url=file_version.url, user=request.user).order_by('-version_number').first()
+            else:
+                raise Http404("User not found")
         except FileVersion.DoesNotExist:
             # If no FileVersion object with the given hash value exists, raise a 404 error
             raise Http404("File not found")
