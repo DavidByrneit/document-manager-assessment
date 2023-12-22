@@ -27,9 +27,6 @@ static CreateFile = (data) => {
       }
     });
   };
-
-  
-
   
   static GetByHash = (data) => {
     return axios.get(`file_version/${data.hash}`, {
@@ -46,13 +43,34 @@ static CreateFile = (data) => {
   });
   };
 
-  static GetUsers = (data) => {
-    return axios.get(`getUsers`, data);
+  static GetDocumentByHash = (id,data) => {
+    return axios.get(`file_version/${id}`, {
+      headers: {
+          'Authorization': `Token ${localStorage.getItem("token")}`
+      }
+  });
   };
-  static GetUser = (user,data) => {
-    return axios.get(`getUser/${user}`, data);
+  static GetOtherDocumentsVersionNumbers = (id,data) => {
+    return axios.get(`file_version_latest/${id}`, {
+      headers: {
+          'Authorization': `Token ${localStorage.getItem("token")}`
+      }
+  });
   };
-
+  
+  static GetFile = (url,revision) => {
+    let requestUrl = `documents/${url}`;
+    if (revision) {
+        requestUrl += `?revision=${revision}`;
+    }
+    // Send the file data to the server
+    return axios.get(requestUrl,{
+      headers: {
+        'Authorization': `Token ${localStorage.getItem("token")}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  };
   
 
   

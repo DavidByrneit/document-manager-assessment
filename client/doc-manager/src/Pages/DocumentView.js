@@ -5,11 +5,12 @@ import { Document, Page } from 'react-pdf';
 
 function DocumentView({ isAuthenticated }) {
   const { id } = useParams();
-  
   const [document, setDocument] = useState(undefined);
   const [otherDocuments, setOtherDocuments] = useState([]);
-  const [selectedDocument, setSelectedDocument] = useState(null);
   const[content_type, setContentType] = useState(null);
+  const [versions, setVersions] = useState([]);
+  const [url, setURL] = useState(null);
+
   useEffect(() => {
     // Call your API here with the id
     ProcessApi.GetDocumentByHash(id)
@@ -23,19 +24,39 @@ function DocumentView({ isAuthenticated }) {
         // Handle the error
       });
 
-    // // Fetch other documents
-    // ProcessApi.GetOtherDocuments()
-    //   .then(docs => {
-    //     setOtherDocuments(docs.data);
-    //   })
-    //   .catch(error => {
-    //     // Handle the error
-    //   });
+    // Fetch other documents
+    ProcessApi.GetOtherDocumentsVersionNumbers(id)
+      .then(docs => {
+        setURL(docs.data.url);
+        const versionsArray = [];
+        for(let i = docs.data.version_number; i >= 1; i--) {
+          versionsArray.push(i);
+        }
+    setVersions(versionsArray);
+        console.log(docs.data);
+      })
+      .catch(error => {
+        // Handle the error
+      });
   }, []);
 
   const handleDocumentChange = (e) => {
-    const selectedDoc = otherDocuments.find(doc => doc.id === e.target.value);
-    setSelectedDocument(selectedDoc);
+    ProcessApi.GetFile(url , e.target.value)
+      .then(document => {
+        console.log(document.data.hash_value);
+        ProcessApi.GetDocumentByHash(document.data.hash_value)
+      .then(document => {
+        setOtherDocuments(document);
+        setContentType(document.headers.get('Content-Type'));
+      })
+      .catch(error => {
+        // Handle the error
+      });
+      })
+      .catch(error => {
+        // Handle the error
+      });
+    
   }
 
   return (
@@ -51,14 +72,13 @@ function DocumentView({ isAuthenticated }) {
       <div className="flex flex-col items-center justify-center w-1/2">
         <h2 class="text-2xl font-bold mb-4">Other Documents</h2>
         <select onChange={handleDocumentChange}>
-          {otherDocuments.map(doc => (
-            <option value={doc.id}>{doc.name}</option>
-          ))}
-        </select>
-        {selectedDocument && selectedDocument.file && 
-          <object data={selectedDocument.file} type="application/pdf" width="100%" height="100%">
-            <embed src={selectedDocument.file} type="application/pdf" />
-          </object>
+        {versions.map((version, index) => (
+          <option key={index} value={version}>Version {version}</option>
+        ))}
+      </select>
+      {
+          content_type === 'text/plain' &&
+          <pre>{otherDocuments.data}</pre>
         }
       </div>
     </div>

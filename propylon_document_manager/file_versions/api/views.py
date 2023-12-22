@@ -106,3 +106,17 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
         file_path = file_version.file.path
        
         return FileResponse(open(file_path, 'rb'))
+    
+    def retrieve_by_hash_version_numbers(self, request, hash_value, *args, **kwargs):
+        try:
+            # Use the hash value to retrieve the corresponding FileVersion object
+            file_version = FileVersion.objects.get(hash_value=hash_value)
+            file_version_latest = FileVersion.objects.filter(url=file_version.url,user=request.user).order_by('-version_number').first()
+        except FileVersion.DoesNotExist:
+            # If no FileVersion object with the given hash value exists, raise a 404 error
+            raise Http404("File not found")
+        
+       # Serialize the file_version object
+        serializer = self.get_serializer(file_version_latest)
+       
+        return Response(serializer.data)

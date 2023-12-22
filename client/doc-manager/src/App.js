@@ -6,7 +6,7 @@ import Register from "./Pages/Register";
 import Logout from "./Pages/Logout";
 import ListDocuments from './Pages/ListDocuments';
 import CreateDocument from './Pages/CreateDocument';
-import DocumentByHash from './Pages/DocumentByHash';
+
 import DocumentView from './Pages/DocumentView';
 // import { ReactComponent as NavigationIcon } from './Assets/Icons/INCASELogo.svg';
 // import {HomeIcon,ClockIcon,StatsIcon,DocumentIcon,GlobeIcon,ProfileIcon,RocketIcon} from './Assets/Icons/Icons'
@@ -36,7 +36,6 @@ export default function App() {
           <Route path="list_documents" element={<ListDocuments isAuthenticated={isAuthenticated}/>} />
           <Route path="list_documents/view/:id" element={<DocumentView isAuthenticated={isAuthenticated}/>} />
           <Route path="create_document" element={<CreateDocument isAuthenticated={isAuthenticated}/>} />
-          <Route path="document_by_hash" element={<DocumentByHash isAuthenticated={isAuthenticated}/>} />
           <Route path="*" element={<NoMatch />} />
         </Route>
       </Routes>
@@ -75,18 +74,7 @@ function Layout() {
                 <span className=" flex-grow ml-2">Create Documents</span>
               </Link>
             </li>
-            <li className="my-4">
-              <Link
-                to="/document_by_hash"
-                className="flex items-center justify-center block p-2  rounded hover:bg-green-700 hover:text-white bg-white text-gray-800 font-semibold"
-              >
-                <div className="bg-green-700 rounded p-2">
-                  {/* <DocumentIcon color="#ffffff" /> */}
-                </div>
-                <span className="flex-grow ml-2">Documents By Hash</span>
-              </Link>
             
-            </li>
             
             <hr className="my-4" />
             
