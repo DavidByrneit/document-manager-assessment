@@ -36,11 +36,14 @@ class UserViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, UpdateMod
                 validate_password(password)
             except ValidationError as e:
                 return Response({"password": e.messages}, status=status.HTTP_400_BAD_REQUEST)
-        self.perform_create(serializer)
+        user=self.perform_create(serializer)
+        user.set_password(password)  # Hash the password
+        user.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
-        serializer.save()
+        user = serializer.save()
+        return user
         
     def get_queryset(self, *args, **kwargs):
         assert isinstance(self.request.user.id, int)
