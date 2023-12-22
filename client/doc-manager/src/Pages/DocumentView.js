@@ -1,7 +1,7 @@
 import ProcessApi from "../API/DBAPI";
 import { useParams } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
-import { Document, Page } from 'react-pdf';
+import { useNavigate } from "react-router-dom";
 
 function DocumentView({ isAuthenticated }) {
   const { id } = useParams();
@@ -10,8 +10,12 @@ function DocumentView({ isAuthenticated }) {
   const[content_type, setContentType] = useState(null);
   const [versions, setVersions] = useState([]);
   const [url, setURL] = useState(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login"); // Redirect to the login page if not authenticated
+      
+    }else{
     // Call your API here with the id
     ProcessApi.GetDocumentByHash(id)
       .then(document => {
@@ -37,7 +41,7 @@ function DocumentView({ isAuthenticated }) {
       })
       .catch(error => {
         // Handle the error
-      });
+      });}
   }, []);
 
   const handleDocumentChange = (e) => {

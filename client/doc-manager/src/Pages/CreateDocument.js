@@ -1,6 +1,6 @@
 
 import ProcessApi from "../API/DBAPI";
-import React, { useState} from 'react';
+import React, { useState,useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
 
 function CreateDocument({isAuthenticated}) {
@@ -8,6 +8,13 @@ function CreateDocument({isAuthenticated}) {
   const [file, setFile] = useState("");
   const navigate = useNavigate();
   const [error, setError] = useState(undefined);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate("/login"); // Redirect to the login page if not authenticated
+      
+    }
+    
+  }, []);
   const createFile = async (event) => {
     if (event) {
       event.preventDefault();
