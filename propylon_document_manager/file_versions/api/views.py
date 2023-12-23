@@ -93,7 +93,7 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
             # If a revision number is provided, get that specific version
             try:
                 if isinstance(request.user, User):
-                    file_version = FileVersion.objects.get(url=document_path, version_number=revision, user=request.user)
+                    file_version = FileVersion.objects.get(url=document_path, version_number=revision)
                 else:
                     raise Http404("User not authenticated.")
             except FileVersion.DoesNotExist:
@@ -102,7 +102,7 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
         else:
             # If no revision number is provided, get the latest version
             if isinstance(request.user, User):
-                file_version = FileVersion.objects.filter(url=document_path,user=request.user).order_by('-version_number').first()
+                file_version = FileVersion.objects.filter(url=document_path).order_by('-version_number').first()
             else:
                 raise Http404("User not authenticated.")
             if file_version is None:
@@ -133,7 +133,7 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
             # Use the hash value to retrieve the corresponding FileVersion object
             file_version = FileVersion.objects.get(hash_value=hash_value)
             if isinstance(request.user, User):
-                file_version_latest = FileVersion.objects.filter(url=file_version.url, user=request.user).order_by('-version_number').first()
+                file_version_latest = FileVersion.objects.filter(url=file_version.url).order_by('-version_number').first()
             else:
                 raise Http404("User not found")
         except FileVersion.DoesNotExist:
