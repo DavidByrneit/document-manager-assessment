@@ -38,21 +38,18 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
     def create(self, request: Request, *args: Tuple[Any], **kwargs: Dict[str, Any]) -> Response:
         # Get the document path from the request
         document_path = kwargs.get('document_path', '')
-        print(1)
         if isinstance(document_path, str):
             document_path = unquote(document_path)
-            print(2)
         else:
             raise ValidationError('Document path must be a string.')
         if not document_path:
             raise ValidationError('Document path is required.')
         # Get the file from the request
         file = request.FILES.get('file')
-        print(3)
         if file:
-            print(3.5)
             if isinstance(request.user, User):
-                print(4)
+                
+                print(file.name)
                 existing_files_same_user = FileVersion.objects.filter(url=document_path, user=request.user)
                 existing_files_other_users = FileVersion.objects.filter(url=document_path).exclude(user=request.user)
             else:
@@ -61,20 +58,18 @@ class FileVersionViewSet(CreateModelMixin,RetrieveModelMixin, ListModelMixin, Ge
                 # If a file with the same URL exists for other users, return an error
                 raise ValidationError('The URL has been taken already.')
             elif existing_files_same_user.exists():
-                print(5)
                 # If a file with the same URL exists for the current user, increment the version number by 1
                 max_version = existing_files_same_user.aggregate(Max('version_number'))['version_number__max']
                 version_number = max_version + 1
             else:
                 # If no file with the same URL exists, start with version number 1
-                print(6)
                 version_number = 1
 
             # Create a new FileVersion object with the provided file, version number, and user
             file_version = FileVersion(file_name=file, version_number=version_number, file=file, url=document_path, user=request.user)
             # Save the new FileVersion object
             file_version.save()
-            print(7)
+
             # Return a 201 CREATED response
             return Response(status=status.HTTP_201_CREATED)
         else:
