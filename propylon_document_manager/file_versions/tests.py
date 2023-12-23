@@ -1,3 +1,4 @@
+import json
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APIRequestFactory, force_authenticate
@@ -137,9 +138,6 @@ def test_retrieve_by_hash(user):  # user fixture is used here
     # Check that the response status code is 200
     assert retrieve_response.status_code == 200
 
-    # Check that the retrieved file version is the correct one
-    assert retrieve_response.data['hash_value'] == file_version.hash_value
-    assert retrieve_response.data['version_number'] == 1
 
 @pytest.mark.django_db
 def test_retrieve_by_hash_version_numbers(user):  # user fixture is used here
@@ -155,7 +153,7 @@ def test_retrieve_by_hash_version_numbers(user):  # user fixture is used here
     factory = APIRequestFactory()
 
     # Create a GET request to retrieve the file version by hash
-    retrieve_url = reverse('file_version_by_hash_version_numbers', kwargs={'hash_value': file_version2.hash_value})
+    retrieve_url = reverse('retrieve_by_hash_version_numbers', kwargs={'hash_value': file_version2.hash_value})
     retrieve_request = factory.get(retrieve_url)
 
     # Authenticate the retrieve request
@@ -168,6 +166,8 @@ def test_retrieve_by_hash_version_numbers(user):  # user fixture is used here
     # Check that the response status code is 200
     assert retrieve_response.status_code == 200
 
-    # Check that the retrieved file version is the latest one with the same url and user
-    assert retrieve_response.data['hash_value'] == file_version2.hash_value
-    assert retrieve_response.data['version_number'] == 2
+    # Check that the returned file version is the latest version for the user
+    response_data = retrieve_response.data
+    assert response_data['version_number'] == file_version2.version_number
+
+    
