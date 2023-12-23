@@ -25,6 +25,7 @@ urlpatterns = [
         name="api-docs",
     ),
     path("users/", include("propylon_document_manager.users.urls")),
+    path('admin/', admin.site.urls),
 ]
 
 if settings.DEBUG:
