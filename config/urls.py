@@ -5,6 +5,7 @@ from django.urls import include, path,re_path
 from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
 from rest_framework.authtoken.views import obtain_auth_token
 from propylon_document_manager.file_versions.api.views import FileVersionViewSet
 # API URLS
